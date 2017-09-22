@@ -10,7 +10,7 @@
 - Компания по разработке ПО
 - ~10 главных продуктов (которые в свою очередь состоят из компонент)
 - Требуется разное сборочное окружение для команд (sdk\компиляторы\языки\etc)
-- Выделенный отдел, который занимается сборочным окружением и помогает командам выстроить процессы CI
+- Выделенный отдел, который занимается сборочным окружением и помогает командам выстроить процессы CI (группа поддержки процессов Continious Integration)
 - Компания поддерживает как текущие релизы ПО, так и старые (в том числе сертифицированные по требованиям ФСТЭК и других регуляторов)
 
 ## Что было раньше
@@ -49,8 +49,10 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPref
 RUN (New-Object System.Net.WebClient).DownloadFile('http://download.microsoft.com/download/5/f/7/5f7acaeb-8363-451f-9425-68a90f98b238/visualcppbuildtools_full.exe', 'visualcppbuildtools_full.exe') ; \
     Start-Process .\visualcppbuildtools_full.exe -ArgumentList '/NoRestart /S' -Wait ; \
     rm visualcppbuildtools_full.exe
+# На самом деле тут еще нужно бы почистить temp-папки
 ```
-Но а где же apt-get в две строки?
+
+Но а где же apt-get в две строки как это было в Linux?
 ```bash
 FROM gcc:6.3.0
 
@@ -58,13 +60,15 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends cmake
 ```
 
-Если такое требовать писать от разработчиков - они откажутся это делать, и будут опять просить нас установить нужное им ПО, но уже в докер. Хочется вот так:
+Если такое требовать писать от разработчиков - они откажутся это делать, и будут опять просить нас установить нужное им ПО, но уже в докер. 
+
+Хочется вот так:
 
 ```bash
 # EXE|MSI
 RUN "C:\install-web\install-web.ps1"\
     -URL https://yourstorage.example.ru/win/packages/erlang/otp_win64_20.0.exe \
-    -Filename erlang.exe \
+    -Filename erlang.exe \ 
     -InstallArgs '/S'
 
 # ZIP
@@ -82,13 +86,23 @@ ENV PATH 'C:\Program Files\RabbitMQ\3.4\bin';$PATH # проставлять в P
 ```
 
 ## Долгий билд
+Установка студии (только build-tools) на в контейнер занимает порядка 30 минут и весит такой слой 10ГБ. Чтобы каждая команда не устанавливала самостоятельно большие пакеты, есть несколько базовых образов, которые распространяет всё та же группы поддержки процессов Continious Integration
+**TODO**: Тут будет рисунок схематичный - какие контейнеры откуда наследуются
+
 ## Remote-registry
+Про проблему с Artifactory4 и новый форматом указания кеш-слоёв
+
 ## Installation workflow
-1. Сохранить exe\msi на сервер по адресу https://yourstorage.example.ru/win/packages
+1. Сохранить exe\msi на сервер по адресу https://yourstorage.example.ru/win/packages - мы всегда храним установщики у себя, чтобы меньше зависить от интернета (не всегда получается, как например со msbuild-tools)
 2. С помощью [USSF](http://www.softpedia.com/get/System/Launchers-Shutdown-Tools/Universal-Silent-Switch-Finder.shtml) найти ключи для установки в тихом режиме (без взаимодействия пользователя
 3. Добавляем строчку с помощью скрипта install-web.ps1 (или download-and-unpack) по аналогии с существующими
-## Тут еще что-нибудь
+
+## Кто-то по прежнему требует GUI
+.net 4.0
+
 ## Dockerfile
+Итоговый Dockerfile можно на базовый образ с Visual Studio 2015 можно [посмотреть тут](windows-vc140/Dockerfile)
+Наследуемый от него образ - []windows-team1/Dockerfile]
 
 ## Прочие баги
 Взять из вики
