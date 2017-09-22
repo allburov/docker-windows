@@ -97,12 +97,67 @@ ENV PATH 'C:\Program Files\RabbitMQ\3.4\bin';$PATH # проставлять в P
 2. С помощью [USSF](http://www.softpedia.com/get/System/Launchers-Shutdown-Tools/Universal-Silent-Switch-Finder.shtml) найти ключи для установки в тихом режиме (без взаимодействия пользователя
 3. Добавляем строчку с помощью скрипта install-web.ps1 (или download-and-unpack) по аналогии с существующими
 
-## Кто-то по прежнему требует GUI
-.net 4.0
 
 ## Dockerfile
 Итоговый Dockerfile можно на базовый образ с Visual Studio 2015 можно [посмотреть тут](windows-vc140/Dockerfile)
 Наследуемый от него образ - []windows-team1/Dockerfile]
 
 ## Прочие баги
-Взять из вики
+
+### GetFinalPathNameByHandle 
+Функция **GetFinalPathNameByHandle** неправильно отображает примапленные пути 
+
+Подробнее 
+- [MSDN](https://social.msdn.microsoft.com/Forums/en-US/3f111d9d-1223-42f1-a913-5caba4b773bc/getfinalpathnamebyhandlevolumenamedos-function-is-not-working-inside-container?forum=windowscontainers)
+- [realpath](https://github.com/StefanScherer/dockerfiles-windows/tree/master/realpath)
+
+На нас это повлияло в python-скриптах (именно их мы используем для автоматизации)
+```python
+mkdir c:\test
+docker run -v c:\test:c:\test -it python:3.6-windowsservercore powershell
+python
+
+from nt import _getfinalpathname
+
+_getfinalpathname('c:\\') # OK
+_getfinalpathname('c:\\test')
+
+>>> _getfinalpathname('c:\\test')
+Traceback (most recent call last):
+ File "<stdin>", line 1, in <module>
+FileNotFoundError: [WinError 2] The system cannot find the file specified: 'c:\\test'
+>>>
+```
+
+**Хак** (доступен в [Dockerfile](windows-vc140/Dockerfile)): патчить **pathlib.py**, заменяя используемые функции.
+
+### 260 символов в filename
+Многие сталкивались с прекрасным ограничением в Win32 API MAX_PATH=260 символов (когда файл нельзя назвать длинее 260 символов)
+
+В Windows-docker эта проблема появляется - если к запускаемому докеру подключать директорию, то она подключается как symlink
+- Безобидный **c:\build** превращается в **\\?\ContainerMappedDirectories\30FA5B39-9158-4785-A3A9-0435BFF32D2B**
+- Даже если в хостовой системе путь допустимый и меньше 260 символов, то в docker он превращается в более длинный путь
+
+У этой баги возможно есть фикс - обещали в локальный политиках дать возможность отключить ограничение на количество символов в имени. Но это не точно
+
+### У каждого слоя - свой hostname
+Проблема установки служб - у каждого слоя свой hostname, получается следующее:
+1. Устанавливается в слое rabbitmq
+2. В ледующем - запускается
+3. Проодят еще шаги
+4. Запускается контейнер - но у него уже hostname другой, получается что rabbitmq ругается
+```
+Hostname mismatch: node "rabbit@202fd51f02fd" believes its host is different. Please ensure that hostnames resolve the same way locally and on "rabbit@202fd51f02fd"
+```
+
+### Silent install & GUI
+Два примера:
+1. gvim (vim для Windows) - ранее не поддерживал silent-установку, пришлось править инсталлятор (уже замерджено, возможно и инсталлятор исправленный выпустили)
+2. .NET SDK 4.0 - устанавливается только в GUI-режиме
+
+Надеюсь, со временем создатели ПО под Windows будут ориентировать на console mode, чтобы и установка и работа с приложениями была доступна из консули
+
+## Дальнейшее развитие
+- Устанавливать наши продукты в docker и гонять интеграционные тесты
+- Поставлять dev-окружение контейнерами
+- Поставлять production docker-образы
