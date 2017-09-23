@@ -2,6 +2,7 @@
 ==========================================
 
 ------
+TODO: Тут будет индекс доклада
 
   
 ------
@@ -99,10 +100,14 @@ ENV PATH 'C:\Program Files\RabbitMQ\3.4\bin';$PATH # проставлять в P
 
 
 ## Dockerfile
-Итоговый Dockerfile можно на базовый образ с Visual Studio 2015 можно [посмотреть тут](windows-vc140/Dockerfile)
-Наследуемый от него образ - []windows-team1/Dockerfile]
+Итоговый Dockerfile можно на базовый образ с Visual Studio 2015 можно [посмотреть тут](windows-vc140/Dockerfile). Наследуемый от него образ - [windows-team1/Dockerfile]
 
 ## Прочие баги
+
+### Отличие Windows-container от Linux
+Windows-контейнер чуть больше, чем Linux. Помимо файлов, при установке программ, идёт активная работа с реестром, поэтому не получится просто взять и подключить volume с ПО.
+
+https://habrahabr.ru/company/ruvds/blog/315220
 
 ### GetFinalPathNameByHandle 
 Функция **GetFinalPathNameByHandle** неправильно отображает примапленные пути 
@@ -158,6 +163,6 @@ Hostname mismatch: node "rabbit@202fd51f02fd" believes its host is different. Pl
 Надеюсь, со временем создатели ПО под Windows будут ориентировать на console mode, чтобы и установка и работа с приложениями была доступна из консули
 
 ## Дальнейшее развитие
-- Устанавливать наши продукты в docker и гонять интеграционные тесты
+- Устанавливать продукты в docker и гонять интеграционные тесты
 - Поставлять dev-окружение контейнерами
 - Поставлять production docker-образы
