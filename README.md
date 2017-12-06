@@ -30,11 +30,16 @@
 3. Добавляем строчку с помощью скрипта install-web.ps1 по аналогии с существующими 
 
 ``` bash
-# EXE|MSI
+# EXE
 RUN "C:\install-web\install-web.ps1"\
-    -URL https://yourstorage.example.ru/win/packages/erlang/otp_win64_20.0.exe \
-    -Filename erlang.exe \ # Имя файла для сохранения
-    -InstallArgs '/S'
+    -URL https://yourstorage.example.ru/win/packages/microsoft/visualcppbuildtools_full.exe \
+    -InstallArgs '/NoRestart /S'
+    
+# MSI
+RUN "C:\install-web\install-web.ps1"\
+    -URL https://yourstorage.example.ru/win/packages/erlang/otp_win64_20.0.msi \
+    -Filename erlang.msi 
+    -InstallArgs '/S' # на самом деле вызывает msiexec.exe /I erlang.msi /S
 
 # ZIP
 RUN "C:\install-web\install-web.ps1"\
