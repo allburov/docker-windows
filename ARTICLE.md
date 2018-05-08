@@ -257,7 +257,7 @@ ENV PATH 'C:\Program Files\RabbitMQ\3.4\bin';$PATH # проставлять в P
 Демо
 ----
 
-Давайте попробуем установить Erlang новой версии в дополнении к vc150
+Давайте попробуем установить Erlang новой версии в дополнении к vc140
 
 1.  Скачать Erlang с сайта (найти в гугле). Зачем качать? Чтобы не ждать каждый
     раз при пересборке полного Dockerfile по 5 минут на скачивание одного exe :)
@@ -272,7 +272,7 @@ ENV PATH 'C:\Program Files\RabbitMQ\3.4\bin';$PATH # проставлять в P
     `install-web` + `download-and-unpack` , из папки windows-team1 скопировать
     Dockerfile.
 
-5.  Сделать новый Dockerfile, унаследоваться от windows-vc150
+5.  Сделать новый Dockerfile, унаследоваться от windows-vc140
 
 6.  Проверить с помощью USSF ключи тихой установки erlang
 
@@ -283,6 +283,8 @@ ENV PATH 'C:\Program Files\RabbitMQ\3.4\bin';$PATH # проставлять в P
     1.  hostname
 
     2.  проверить версию erlang.exe
+
+9.  Поменять на `FROM vc150`
 
 Windows Docker Bug (not Bounty)
 ===============================
