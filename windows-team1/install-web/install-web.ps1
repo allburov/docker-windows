@@ -1,7 +1,7 @@
 Param(
     [Parameter(Mandatory=$True,Position=1)]
     [string]$URL,
-	
+    
     [Parameter(Mandatory=$True,Position=2)]
     [string]$Filename,
 
@@ -46,13 +46,13 @@ else{
 
 $extension = $fullpath.Split('.')[-1]
 if ($extension -eq "exe"){ 
-	Write-Host "Run: $fullpath  $InstallArgs"
+    Write-Host "Run: $fullpath  $InstallArgs"
     Start-Process $fullpath -ArgumentList $InstallArgs -Wait 
 }
 
 if ($extension -eq "msi"){ 
     Write-Host "Run: msiexec.exe /I $fullpath  $InstallArgs"
-	Start-Process msiexec.exe -ArgumentList "/I $fullpath $InstallArgs" -Wait 
+    Start-Process msiexec.exe -ArgumentList "/I $fullpath $InstallArgs" -Wait 
 }
 
 Write-Host "##teamcity[blockOpened name='Clean']"
